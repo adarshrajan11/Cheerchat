@@ -4,7 +4,7 @@ import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, Plus, MessageCircle } from "lucide-react";
-import { useAuth } from "@/hooks/use-auth";
+import { useAuth } from "../hooks/use-auth";
 import { subscribeToChats } from "@/lib/firebase";
 import type { Chat, User } from "@shared/schema";
 

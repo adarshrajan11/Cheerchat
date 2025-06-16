@@ -4,7 +4,7 @@ import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ArrowLeft, Send, Paperclip, Image, Smile, MoreVertical } from "lucide-react";
-import { useAuth } from "@/hooks/use-auth";
+import { useAuth } from "../hooks/use-auth";
 import { subscribeToMessages, sendMessage, uploadFile } from "@/lib/firebase";
 import type { Message, Chat } from "@shared/schema";
 
