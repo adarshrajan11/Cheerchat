@@ -1,0 +1,123 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: hsl(0, 0%, 100%);
+  --foreground: hsl(20, 14.3%, 4.1%);
+  --muted: hsl(60, 4.8%, 95.9%);
+  --muted-foreground: hsl(25, 5.3%, 44.7%);
+  --popover: hsl(0, 0%, 100%);
+  --popover-foreground: hsl(20, 14.3%, 4.1%);
+  --card: hsl(0, 0%, 100%);
+  --card-foreground: hsl(20, 14.3%, 4.1%);
+  --border: hsl(20, 5.9%, 90%);
+  --input: hsl(20, 5.9%, 90%);
+  --primary: hsl(17, 88%, 60%);
+  --primary-foreground: hsl(0, 0%, 100%);
+  --secondary: hsl(134, 25%, 35%);
+  --secondary-foreground: hsl(0, 0%, 100%);
+  --accent: hsl(40, 84%, 59%);
+  --accent-foreground: hsl(0, 0%, 0%);
+  --destructive: hsl(0, 84.2%, 60.2%);
+  --destructive-foreground: hsl(60, 9.1%, 97.8%);
+  --ring: hsl(20, 14.3%, 4.1%);
+  --radius: 0.5rem;
+
+  /* Material Design elevation shadows */
+  --shadow-1: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+  --shadow-2: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+  --shadow-3: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
+  --shadow-4: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
+  --shadow-5: 0 19px 38px rgba(0, 0, 0, 0.30), 0 15px 12px rgba(0, 0, 0, 0.22);
+
+  /* Custom colors matching design */
+  --orange-primary: hsl(17, 88%, 60%);
+  --green-secondary: hsl(134, 25%, 35%);
+  --yellow-accent: hsl(40, 84%, 59%);
+  --neutral-50: hsl(0, 0%, 98%);
+  --neutral-100: hsl(240, 5%, 96%);
+  --neutral-800: hsl(0, 0%, 20%);
+  --neutral-900: hsl(0, 0%, 10%);
+}
+
+.dark {
+  --background: hsl(240, 10%, 3.9%);
+  --foreground: hsl(0, 0%, 98%);
+  --muted: hsl(240, 3.7%, 15.9%);
+  --muted-foreground: hsl(240, 5%, 64.9%);
+  --popover: hsl(240, 10%, 3.9%);
+  --popover-foreground: hsl(0, 0%, 98%);
+  --card: hsl(240, 10%, 3.9%);
+  --card-foreground: hsl(0, 0%, 98%);
+  --border: hsl(240, 3.7%, 15.9%);
+  --input: hsl(240, 3.7%, 15.9%);
+  --primary: hsl(17, 88%, 60%);
+  --primary-foreground: hsl(0, 0%, 100%);
+  --secondary: hsl(134, 25%, 35%);
+  --secondary-foreground: hsl(0, 0%, 98%);
+  --accent: hsl(240, 3.7%, 15.9%);
+  --accent-foreground: hsl(0, 0%, 98%);
+  --destructive: hsl(0, 62.8%, 30.6%);
+  --destructive-foreground: hsl(0, 0%, 98%);
+  --ring: hsl(240, 4.9%, 83.9%);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+    font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Playfair Display', Georgia, serif;
+  }
+}
+
+@layer components {
+  .material-shadow {
+    box-shadow: var(--shadow-2);
+  }
+
+  .material-shadow-lg {
+    box-shadow: var(--shadow-4);
+  }
+
+  .ingredient-chip {
+    @apply px-3 py-2 bg-neutral-100 rounded-full text-sm text-neutral-700 border border-neutral-200 hover:border-primary hover:bg-primary/5 transition-all cursor-pointer;
+  }
+
+  .ingredient-chip.selected {
+    @apply bg-primary/20 border-primary text-primary;
+  }
+
+  .recipe-card {
+    @apply bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow overflow-hidden;
+  }
+
+  .fab {
+    @apply fixed bottom-20 right-4 w-14 h-14 bg-primary rounded-full shadow-lg text-white hover:bg-primary/90 transition-all hover:scale-105 flex items-center justify-center;
+    box-shadow: var(--shadow-3);
+  }
+
+  .app-container {
+    @apply min-h-screen flex flex-col max-w-md mx-auto bg-white;
+    box-shadow: var(--shadow-2);
+  }
+
+  .gradient-primary {
+    background: linear-gradient(135deg, var(--orange-primary), var(--yellow-accent));
+  }
+
+  .gradient-secondary {
+    background: linear-gradient(135deg, var(--green-secondary), #059669);
+  }
+}
+
+/* Material Icons font import */
+@import url('https://fonts.googleapis.com/icon?family=Material+Icons');
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Playfair+Display:wght@400;700&display=swap');
