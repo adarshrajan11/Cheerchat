@@ -6,85 +6,68 @@ export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   username: text("username").notNull().unique(),
   email: text("email").notNull().unique(),
-  password: text("password").notNull(),
-  preferences: jsonb("preferences").$type<{
-    dietaryRestrictions: string[];
-    favoritesCuisines: string[];
-    skillLevel: string;
-  }>(),
+  displayName: text("display_name").notNull(),
+  photoURL: text("photo_url"),
+  firebaseUid: text("firebase_uid").unique(),
+  isOnline: boolean("is_online").default(false),
+  lastSeen: timestamp("last_seen"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
-export const recipes = pgTable("recipes", {
+export const chats = pgTable("chats", {
   id: serial("id").primaryKey(),
-  title: text("title").notNull(),
-  description: text("description").notNull(),
-  ingredients: text("ingredients").array().notNull(),
-  instructions: text("instructions").array().notNull(),
-  prepTime: integer("prep_time").notNull(), // in minutes
-  cookTime: integer("cook_time").notNull(), // in minutes
-  servings: integer("servings").notNull(),
-  difficulty: text("difficulty").notNull(), // Easy, Medium, Hard
-  cuisine: text("cuisine").notNull(),
-  category: text("category").notNull(),
-  imageUrl: text("image_url"),
-  rating: integer("rating").default(0), // 0-5 stars
-  reviewCount: integer("review_count").default(0),
+  name: text("name"),
+  isGroup: boolean("is_group").default(false),
+  participants: text("participants").array().notNull(),
+  lastMessage: text("last_message"),
+  lastMessageTime: timestamp("last_message_time"),
+  createdBy: text("created_by").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
-export const userFavorites = pgTable("user_favorites", {
+export const messages = pgTable("messages", {
   id: serial("id").primaryKey(),
-  userId: integer("user_id").notNull(),
-  recipeId: integer("recipe_id").notNull(),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-});
-
-export const recentViews = pgTable("recent_views", {
-  id: serial("id").primaryKey(),
-  userId: integer("user_id").notNull(),
-  recipeId: integer("recipe_id").notNull(),
-  viewedAt: timestamp("viewed_at").defaultNow().notNull(),
+  chatId: integer("chat_id").notNull(),
+  senderId: text("sender_id").notNull(),
+  senderName: text("sender_name").notNull(),
+  text: text("text").notNull(),
+  type: text("type").notNull().default("text"), // text, image, file
+  fileUrl: text("file_url"),
+  fileName: text("file_name"),
+  fileSize: integer("file_size"),
+  read: boolean("read").default(false),
+  timestamp: timestamp("timestamp").defaultNow().notNull(),
 });
 
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
   email: true,
-  password: true,
-  preferences: true,
+  displayName: true,
+  photoURL: true,
+  firebaseUid: true,
 });
 
-export const insertRecipeSchema = createInsertSchema(recipes).pick({
-  title: true,
-  description: true,
-  ingredients: true,
-  instructions: true,
-  prepTime: true,
-  cookTime: true,
-  servings: true,
-  difficulty: true,
-  cuisine: true,
-  category: true,
-  imageUrl: true,
-  rating: true,
-  reviewCount: true,
+export const insertChatSchema = createInsertSchema(chats).pick({
+  name: true,
+  isGroup: true,
+  participants: true,
+  createdBy: true,
 });
 
-export const insertUserFavoriteSchema = createInsertSchema(userFavorites).pick({
-  userId: true,
-  recipeId: true,
-});
-
-export const insertRecentViewSchema = createInsertSchema(recentViews).pick({
-  userId: true,
-  recipeId: true,
+export const insertMessageSchema = createInsertSchema(messages).pick({
+  chatId: true,
+  senderId: true,
+  senderName: true,
+  text: true,
+  type: true,
+  fileUrl: true,
+  fileName: true,
+  fileSize: true,
 });
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
-export type InsertRecipe = z.infer<typeof insertRecipeSchema>;
-export type Recipe = typeof recipes.$inferSelect;
-export type InsertUserFavorite = z.infer<typeof insertUserFavoriteSchema>;
-export type UserFavorite = typeof userFavorites.$inferSelect;
-export type InsertRecentView = z.infer<typeof insertRecentViewSchema>;
-export type RecentView = typeof recentViews.$inferSelect;
+export type InsertChat = z.infer<typeof insertChatSchema>;
+export type Chat = typeof chats.$inferSelect;
+export type InsertMessage = z.infer<typeof insertMessageSchema>;
+export type Message = typeof messages.$inferSelect;
