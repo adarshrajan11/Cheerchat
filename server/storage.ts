@@ -163,10 +163,13 @@ export class MemStorage implements IStorage {
   async createChat(insertChat: InsertChat): Promise<Chat> {
     const id = this.currentChatId++;
     const chat: Chat = { 
-      ...insertChat, 
       id,
+      name: insertChat.name || null,
+      isGroup: insertChat.isGroup || false,
+      participants: insertChat.participants,
       lastMessage: null,
       lastMessageTime: null,
+      createdBy: insertChat.createdBy,
       createdAt: new Date()
     };
     this.chats.set(id, chat);
@@ -196,8 +199,15 @@ export class MemStorage implements IStorage {
   async createMessage(insertMessage: InsertMessage): Promise<Message> {
     const id = this.currentMessageId++;
     const message: Message = { 
-      ...insertMessage, 
       id,
+      chatId: insertMessage.chatId,
+      senderId: insertMessage.senderId,
+      senderName: insertMessage.senderName,
+      text: insertMessage.text,
+      type: insertMessage.type || "text",
+      fileUrl: insertMessage.fileUrl || null,
+      fileName: insertMessage.fileName || null,
+      fileSize: insertMessage.fileSize || null,
       read: false,
       timestamp: new Date()
     };

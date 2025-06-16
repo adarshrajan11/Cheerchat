@@ -94,11 +94,15 @@ export function subscribeToChats(userId: string, callback: (chats: any[]) => voi
   
   return onSnapshot(chatsRef, (snapshot) => {
     const chats = snapshot.docs
-      .map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }))
-      .filter(chat => chat.participants?.includes(userId));
+      .map(doc => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          ...data,
+          participants: data.participants || []
+        };
+      })
+      .filter(chat => chat.participants.includes(userId));
     callback(chats);
   });
 }

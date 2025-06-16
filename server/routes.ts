@@ -111,9 +111,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/chats/:chatId/messages", async (req, res) => {
     try {
       const chatId = parseInt(req.params.chatId);
-      const validation = insertMessageSchema.extend({
-        chatId: z.number().optional()
-      }).safeParse({ ...req.body, chatId });
+      const validation = insertMessageSchema.safeParse({ ...req.body, chatId });
       
       if (!validation.success) {
         return res.status(400).json({ message: "Invalid message data" });
