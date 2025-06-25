@@ -1,14 +1,20 @@
 import { useState, useEffect, createContext, useContext } from "react";
-import { auth, handleRedirect } from "@/lib/firebase";
-import { onAuthStateChanged, User as FirebaseUser } from "firebase/auth";
+import { auth, handleRedirect, login } from "@/lib/firebase";
+import {
+  onAuthStateChanged,
+  User as FirebaseUser,
+  signOut as firebaseSignOut,
+} from "firebase/auth";
 import type { User } from "@shared/schema";
+import { useLocation } from "wouter";
 
 interface AuthContextType {
   user: User | null;
+  firebaseUid: string;
   firebaseUser: FirebaseUser | null;
   loading: boolean;
-  signIn: () => void;
-  signOut: () => void;
+  signIn: () => Promise<void>;
+  signOut: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -17,75 +23,131 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
   const [loading, setLoading] = useState(true);
+  const [, navigate] = useLocation();
 
   useEffect(() => {
-    // Handle redirect result on app load
-    handleRedirect();
+    let isRedirectHandled = false;
 
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      if (firebaseUser) {
-        setFirebaseUser(firebaseUser);
-        
-        // Check if user exists in our database
-        try {
-          const response = await fetch(`/api/users/firebase/${firebaseUser.uid}`);
-          if (response.ok) {
-            const userData = await response.json();
-            setUser(userData);
-          } else if (response.status === 404) {
-            // Create new user in our database
-            const newUserResponse = await fetch('/api/users', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                username: firebaseUser.email?.split('@')[0] || 'user',
-                email: firebaseUser.email || '',
-                displayName: firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'Anonymous',
-                photoURL: firebaseUser.photoURL,
-                firebaseUid: firebaseUser.uid,
-              }),
-            });
-            
-            if (newUserResponse.ok) {
-              const userData = await newUserResponse.json();
-              setUser(userData);
-            }
-          }
-        } catch (error) {
-          console.error('Error fetching/creating user:', error);
+    const processAuth = async () => {
+      try {
+        const redirectedUser = await handleRedirect();
+        if (redirectedUser) {
+          isRedirectHandled = true;
+          setFirebaseUser(redirectedUser);
+          await handleUserSync(redirectedUser);
         }
-      } else {
-        setFirebaseUser(null);
-        setUser(null);
+      } catch (error) {
+        console.error("Redirect handling error:", error);
+      }
+    };
+
+    processAuth();
+
+    const unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
+      if (!isRedirectHandled) {
+        if (fbUser) {
+          setFirebaseUser(fbUser);
+          await handleUserSync(fbUser);
+        } else {
+          setUser(null);
+          setFirebaseUser(null);
+        }
       }
       setLoading(false);
     });
 
-    return unsubscribe;
+    return () => unsubscribe();
   }, []);
 
-  const signIn = () => {
-    const { login } = require('@/lib/firebase');
-    login();
+
+
+  const handleUserSync = async (fbUser: FirebaseUser) => {
+    try {
+      const response = await fetch(`/api/users/firebase/${fbUser.uid}`);
+
+      if (response.ok) {
+        const userData: User = await response.json();
+        setUser(userData);
+        navigate("/chat");
+      } else if (response.status === 404) {
+        await createNewUser(fbUser);
+        navigate("/chat");
+      } else {
+        console.error("Failed to fetch user data:", response.statusText);
+      }
+    } catch (error) {
+      console.error("User sync error:", error);
+    }
   };
 
-  const signOut = () => {
-    auth.signOut();
+  const createNewUser = async (fbUser: FirebaseUser) => {
+    try {
+      const newUserResponse = await fetch("/api/users", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username: fbUser.email?.split("@")[0] || "user",
+          email: fbUser.email || "",
+          displayName:
+            fbUser.displayName || fbUser.email?.split("@")[0] || "Anonymous",
+          photoURL: fbUser.photoURL,
+          firebaseUid: fbUser.uid,
+        }),
+      });
+
+      if (newUserResponse.ok) {
+        const userData: User = await newUserResponse.json();
+        setUser(userData);
+      } else {
+        console.error("Failed to create user:", newUserResponse.statusText);
+      }
+    } catch (error) {
+      console.error("Create new user error:", error);
+    }
+  };
+
+  const signIn = async () => {
+    try {
+      console.log('Attempting to sign in...');
+      await login();
+    } catch (error) {
+      console.error("Sign-in error:", error);
+      throw error;
+    }
+  };
+
+  const signOut = async () => {
+    try {
+      await firebaseSignOut(auth);
+      setUser(null);
+      setFirebaseUser(null);
+      navigate("/");
+    } catch (error) {
+      console.error("Sign-out error:", error);
+      throw error;
+    }
+  };
+
+  const value: AuthContextType = {
+    firebaseUid: firebaseUser?.uid || "",
+    user,
+    firebaseUser,
+    loading,
+    signIn,
+    signOut,
   };
 
   return (
-    <AuthContext.Provider value={{ user, firebaseUser, loading, signIn, signOut }}>
-      {children}
+    <AuthContext.Provider value={value}>
+      {!loading && children}
     </AuthContext.Provider>
   );
 }
 
-export function useAuth() {
+export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+  if (!context) {
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
-}
+};
