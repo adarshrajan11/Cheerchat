@@ -5,14 +5,15 @@ import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTim
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBU0Rquu2bkDqYcRcp15JL7nEw_FFv4b1Y",
-  authDomain: "cheerschat-da45b.firebaseapp.com",
-  projectId: "cheerschat-da45b",
-  storageBucket: "cheerschat-da45b.firebasestorage.app",
-  messagingSenderId: "1057665167250",
-  appId: "1:1057665167250:web:15ee42def29b9374911b4b",
-  measurementId: "G-8HJR329YPL"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
 };
+console.log(firebaseConfig.apiKey)
 export const firebaseApp = firebaseConfig;
 
 const app = initializeApp(firebaseConfig);
